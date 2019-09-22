@@ -29,7 +29,9 @@ unique(ToothGrowth$dose)
 #5] Create Bar Plot with fill and labels position = Dodge
 ggplot(cabbage_exp, aes(x=Date, y=Weight, fill=Cultivar)) +
   geom_bar(stat='identity', position='dodge') +
-  geom_text(aes(label=Weight), color='white', size=3,position=position_dodge(.9), vjust=2)
+  geom_text(aes(label=Weight), color='white', size=3,position=position_dodge(.9ggplot(df, aes(x=reorder(Seller, Num), y=Avg_Cost)) +
+                                                                               geom_bar(stat='identity') +
+                                                                               coord_flip()), vjust=2)
 
 #6] Create bar plot with fill and labels. Position = Stack
 
