@@ -4,7 +4,7 @@ library(shiny)
 library(gridExtra)
 library(tidyr)
 
-df <- read.csv('D:/MSDS/MSDSQ4/Data608/HW-3/data/HW-3_Data.csv', stringsAsFactors = FALSE)
+df <- read.csv('https://raw.githubusercontent.com/mlforsachid/MSDSQ4/master/Data608/HW-3/data/HW-3_Data.csv', stringsAsFactors = FALSE)
 
 ui <- fluidPage(
   headerPanel('Data 608 HW-3'),
