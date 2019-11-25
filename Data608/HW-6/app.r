@@ -9,8 +9,9 @@ library(shiny)
 library(gridExtra)
 library(tidyr)
 
-orders <- fread('../input/orders.csv')
+orders <- fread('https://media.githubusercontent.com/media/mlforsachid/MSDSQ4/master/Data608/HW-6/data/InstaCart/orders.csv/orders.csv')
 
+orders = orders[1:1000,]
 shinyApp(
   ui = tagList(
     shinythemes::themeSelector(),
@@ -33,22 +34,22 @@ shinyApp(
                
                
       ),
-      tabPanel("Navbar 1",
+      tabPanel("Orders",
                
                fluidPage(
                  
-                 titlePanel('Data 608 HW-6'),
+                 titlePanel('When do people order?'),
                  sidebarPanel(
-                   selectInput('cse', 'Cause', unique(df$ICD.Chapter), selected='Neoplasms'),
-                   selectInput('yre', 'Year', unique(df$Year), selected='2010'),
-                   selectInput('tp', 'Show Top', seq(10,50, by = 5), selected='10')),
+                   selectInput('ordertime', 'Time to Order', c('Day', 'Week'), selected='Day')
+                  ),
                  
                  
                  mainPanel(
                    fluidRow(
-                     column(8, plotOutput('plot1', width="600px", height="800px")),
-                     column(8, verbatimTextOutput('stats')),
-                     plotOutput('plot2', width="600px", height="800px")
+                     column(10, textOutput('ordertext')),
+                     column(8, plotOutput('orderplot', width="600px", height="800px")),
+                     column(10, textOutput('reordertext')),
+                     plotOutput('reorderplot', width="600px", height="800px")
                    )
                  )
                )
@@ -56,15 +57,40 @@ shinyApp(
                
                
       ),
-      tabPanel("Navbar 3", "This panel is intentionally left blank")
+      tabPanel("Products", 
+               fluidPage(
+                 
+                 titlePanel('Which products are best sellers?'),
+                 sidebarPanel(
+                   selectInput('topproduct', 'Show Top', c('5', '10', '15'), selected='5')
+                 ),
+                 
+                 
+                 mainPanel(
+                   fluidRow(
+                     column(10, textOutput('topproducttext')),
+                     column(8, plotOutput('topproductplot', width="600px", height="800px")),
+                     column(10, textOutput('productreordertext')),
+                     plotOutput('productreorderplot', width="600px", height="800px")
+                   )
+                 )
+               )
+               
+               )
     )
   ),
   server <- shinyServer(function(input, output, session) {
     
     selectedData <- reactive({
-      dfSlice <- df %>%
-        filter(Year == input$yre, ICD.Chapter == input$cse)
-      dfSlice = dfSlice[order(dfSlice$Crude.Rate, decreasing = TRUE)[1:input$tp],]
+      dfSlice  =  orders
+      
+      if(input$ordertime == "Day")
+      {
+        dfSlice$ordertime = dfSlice$order_hour_of_day
+      }else{
+        dfSlice$ordertime = dfSlice$order_dow
+      }
+      return(dfSlice)
       
     })
     
@@ -82,34 +108,30 @@ shinyApp(
     })
     
     
-    output$plot1 <- renderPlot({
+    output$orderplot <- renderPlot({
       
-      ggplot(selectedData(), aes(x = reorder(State, (Crude.Rate)), y = Crude.Rate, fill = State)) +
-        geom_bar(stat='identity') +
-        labs(title="Mortality rate per state", 
-             subtitle="State wise mortality rate", 
-             caption="Mortality rate dataset", x='States', y='Mortality Rate') +
-        geom_text(aes(y=Crude.Rate-20, label=Crude.Rate), color='white', size=5) +
-        coord_flip()
-      #coord_polar("y", start=0)
+      selectedData() %>% 
+        ggplot(aes(x=ordertime)) + 
+        geom_histogram(stat="count",fill="blue")
     })
     
-    output$plot2 <- renderPlot({
+    output$ordertext = renderText({
+      paste("Customers order time in a ", input$ordertime)
       
-      ggplot(compareData(), aes(fill = AvgType, y=value, x=AvgType)) +
-        geom_bar(position="dodge", stat='identity') +
-        labs(title="National vs State mortality rate average comparisons", 
-             subtitle="Mortality rate comparison grouped by states", 
-             caption="Mortality rate dataset", x='States', y='Mortality Rate') +
-        geom_text(aes(y=value-10, label=value), color='white', size=3) +
-        facet_wrap(~State) 
     })
     
-    output$stats <- renderPrint({
-      dfSliceTier <- selectedData()
+    output$reorderplot <- renderPlot({
       
-      summary(dfSliceTier$Crude.Rate)
+      orders %>% 
+        ggplot(aes(x=days_since_prior_order)) + 
+        geom_histogram(stat="count",fill="green")
     })
+    
+    output$reordertext = renderText({
+      paste("When do customers reorder?")
+      
+    })
+   
     
   })
   
