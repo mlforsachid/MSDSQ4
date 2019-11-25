@@ -8,10 +8,11 @@ library(dplyr)
 library(shiny)
 library(gridExtra)
 library(tidyr)
+library(curl)
 
-orders <- fread('https://media.githubusercontent.com/media/mlforsachid/MSDSQ4/master/Data608/HW-6/data/InstaCart/orders.csv/orders.csv')
-products <- fread('https://media.githubusercontent.com/media/mlforsachid/MSDSQ4/master/Data608/HW-6/data/InstaCart/products.csv/products.csv')
-order_products <- fread('https://media.githubusercontent.com/media/mlforsachid/MSDSQ4/master/Data608/HW-6/data/InstaCart/order_products__train.csv/order_products__train.csv')
+orders <- fread('https://media.githubusercontent.com/media/mlforsachid/MSDSQ4/master/Data608/HW-6/data/InstaCart/orders.csv/orders.csv', header = TRUE, sep = ",")
+products <- fread('https://media.githubusercontent.com/media/mlforsachid/MSDSQ4/master/Data608/HW-6/data/InstaCart/products.csv/products.csv' , header = TRUE, sep = ",")
+order_products <- fread('https://media.githubusercontent.com/media/mlforsachid/MSDSQ4/master/Data608/HW-6/data/InstaCart/order_products__train.csv/order_products__train.csv' , header = TRUE, sep = ",")
 
 orders = orders[1:1000,]
 shinyApp(
